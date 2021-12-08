@@ -15,5 +15,7 @@ urlpatterns=[
 	path('reviews/', views.ReviewView.as_view(), name='reviews'),
 	path('userlist/', views.UserListView.as_view(), name='userlist'),
 	path('userprofile/', views.UserProfileView.as_view(), name='userprofile'),
-	path('addfilm/', views.AddFilmView.as_view(), name='addfilm')
+	path('addfilm/', views.AddFilmView.as_view(), name='addfilm'),
+	path('follow/', views.FollowView.as_view(), name='follow'),
+	path('unfollow/', views.UnFollowView.as_view(), name='unfollow')
 ]

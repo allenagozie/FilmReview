@@ -23,6 +23,17 @@ class CustomUser(AbstractUser):
 	def follow_count(self):
 		return self.followers.count()
 
+class Following(models.Model):
+	follower = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='follower', on_delete=models.CASCADE, null=True)
+	the_followed = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='followed', on_delete=models.CASCADE, null=True)
+	date_followed = models.DateTimeField(auto_now=True)
+
+	def __str__(self):
+		return f'{self.follower.username} followed {self.the_followed.usermame}'
+
+	class Meta:
+		verbose_name_plural = 'Following Connections'
+
 
 class Review(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="reviews", on_delete=models.CASCADE, null=True)

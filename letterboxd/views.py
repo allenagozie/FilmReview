@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework import permissions
-from .models import CustomUser, Film, Review, UserList, AddFilm
+from .models import CustomUser, Film, Review, UserList, AddFilm, Following
 from .permissions import IsOwnerOrReadOnly
 from django.shortcuts import render
 
@@ -108,3 +108,42 @@ class AddFilmView(APIView):
 		request.user.films_watched.add(film)
 	
 		return Response(HTTP_200_OK)
+
+class FollowView(APIView):
+	permission_classes = [IsAuthenticated, ]
+
+	def post(self, request):
+		follower = request.user
+		followed_username = request.data.get('username')
+
+		try:
+			the_followed = CustomUser.objects.get(username=followed_username)
+			if follower == the_followed:
+				return Response('you cannot follow yourself')
+			
+			for f in the_followed.followed.all():
+				if f.follower == follower:
+					return Response('already following user')
+
+		except CustomUser.DoesNotExist:
+			return Response('user does not exist')
+		Following.objects.create(follower=follower, the_followed=the_followed)
+		return Response( f"you are now following {followed_username}",HTTP_200_OK)
+
+
+class UnFollowView(APIView):
+	permission_classes = [IsAuthenticated, ]
+
+	def delete(self, request):
+		unfollower = request.user 
+		unfollowed = request.data.get('username')
+
+		if unfollower == unfollowed:
+			return Response("you can't unfollow yourself")
+
+		try:
+			connection = Following.objects.get(follower=follower, following=following)
+			connection.delete()
+			return Response(HTTP_204_NO_CONTENT)
+		except:
+			return Response('Not Following User')
