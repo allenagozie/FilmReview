@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework import permissions
-from .models import CustomUser, Film, Review, UserList, AddFilm, Following
+from .models import CustomUser, Film, Review, UserList, AddFilm, Following, Like
 from .permissions import IsOwnerOrReadOnly
 from django.shortcuts import render
 
@@ -147,3 +147,14 @@ class UnFollowView(APIView):
 			return Response(HTTP_204_NO_CONTENT)
 		except:
 			return Response('Not Following User')
+
+class LikeView(APIView):
+	permission_classes = [IsAuthenticated, ]
+
+	def post(self, request):
+		film = Film.objects.get(name=request.data["name"])
+		new_like, created = Like.objects.get_or_create(user=request.user, film=film)
+		if not created:
+			return Response("already liked")
+		else:
+			return Response("liked", HTTP_200_OK)

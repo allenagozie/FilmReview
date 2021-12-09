@@ -55,3 +55,10 @@ class AddFilm(models.Model):
 
 	class Meta:
 		verbose_name_plural = "Adding Films"
+
+class Like(models.Model):
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='liked_by', on_delete=models.CASCADE, null=True)
+	film = models.ForeignKey(Film, related_name='likes', on_delete=models.CASCADE, null=True)
+
+	def __unicode__(self):
+		return self.description 
