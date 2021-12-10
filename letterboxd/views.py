@@ -1,11 +1,11 @@
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
-from letterboxd.serializers import CustomUserSerializer, FilmSerializer, ReviewSerializer, UserListSerializer, UserProfileSerializer
+from letterboxd.serializers import CustomUserSerializer, FilmSerializer, ReviewSerializer, UserListSerializer, UserProfileSerializer, FollowingSerializer
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework import permissions
-from .models import CustomUser, Film, Review, UserList, AddFilm
+from .models import CustomUser, Film, Review, UserList, AddFilm, Following, Like
 from .permissions import IsOwnerOrReadOnly
 from django.shortcuts import render
 
@@ -60,6 +60,7 @@ class ListFilmView(APIView):
 		serializer = FilmSerializer(film_list, many=True)
 		return Response(serializer.data, HTTP_200_OK)
 
+
 class ReviewView(APIView):
 	queryset = Review.objects.all()
 	serializer_class = ReviewSerializer
@@ -108,3 +109,68 @@ class AddFilmView(APIView):
 		request.user.films_watched.add(film)
 	
 		return Response(HTTP_200_OK)
+
+class FollowView(APIView):
+	permission_classes = [IsAuthenticated, ]
+
+	def post(self, request):
+		follower = request.user
+		followed_username = request.data.get('username')
+
+		try:
+			the_followed = CustomUser.objects.get(username=followed_username)
+			if follower == the_followed:
+				return Response('you cannot follow yourself', HTTP_400_BAD_REQUEST)
+			
+			for f in the_followed.followed.all():
+				if f.follower == follower:
+					return Response('already following user', HTTP_400_BAD_REQUEST)
+
+		except CustomUser.DoesNotExist:
+			return Response('user does not exist')
+		Following.objects.create(follower=follower, the_followed=the_followed)
+		return Response( f"you are now following {followed_username}",HTTP_200_OK)
+
+		def delete(self, request):
+			unfollower = request.user 
+			unfollowed = request.data.get('username')
+
+			if unfollower == unfollowed:
+				return Response("you can't unfollow yourself", HTTP_400_BAD_REQUEST)
+
+			try:
+				connection = Following.objects.get(follower=follower, following=following)
+				connection.delete()
+				return Response(HTTP_204_NO_CONTENT)
+			except:
+				return Response('Not Following User', HTTP_400_BAD_REQUEST)
+
+
+class LikeView(APIView):
+	permission_classes = [IsAuthenticated, ]
+
+	def post(self, request):
+		film = Film.objects.get(name=request.data["name"])
+		new_like, created = Like.objects.get_or_create(user=request.user, film=film)
+		if not created:
+			return Response("already liked", HTTP_400_BAD_REQUEST)
+		else:
+			return Response("liked", HTTP_200_OK)
+
+class ListFollowingView(APIView):
+	permission_classes = [IsAuthenticated, ]
+
+	def get(self, request):
+		connections =  request.user.followers.all()
+		following = [connection.the_followed for connection in connections]
+		serializer =  UserProfileSerializer(following, many=True)
+		return Response(serializer.data, HTTP_200_OK)
+
+class ListFollowersView(APIView):
+	permission_classes = [IsAuthenticated, ]
+
+	def get(self, request):
+		connections = request.user.followed.all()
+		my_followers = [connection.follower for connection in connections]
+		serializer = UserProfileSerializer(my_followers, many=True)
+		return Response(serializer.data, HTTP_200_OK)

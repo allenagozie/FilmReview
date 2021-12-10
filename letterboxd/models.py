@@ -23,6 +23,17 @@ class CustomUser(AbstractUser):
 	def follow_count(self):
 		return self.followers.count()
 
+class Following(models.Model):
+	follower = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='followers', on_delete=models.CASCADE, null=True)
+	the_followed = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='followed', on_delete=models.CASCADE, null=True)
+	date_followed = models.DateTimeField(auto_now=True)
+
+	def __str__(self):
+		return f'{self.follower.id} followed {self.the_followed.id}'
+
+	class Meta:
+		verbose_name_plural = 'Following Connections'
+
 
 class Review(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="reviews", on_delete=models.CASCADE, null=True)
@@ -44,3 +55,7 @@ class AddFilm(models.Model):
 
 	class Meta:
 		verbose_name_plural = "Adding Films"
+
+class Like(models.Model):
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='likes', on_delete=models.CASCADE, null=True)
+	film = models.ForeignKey(Film, related_name='likes', on_delete=models.CASCADE, null=True)

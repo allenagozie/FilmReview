@@ -1,5 +1,5 @@
 from rest_framework import serializers 
-from .models import CustomUser, Film, Genre, Review, UserList
+from .models import CustomUser, Film, Genre, Review, UserList, Following
 from rest_framework.validators import UniqueValidator
 
 
@@ -54,3 +54,4 @@ class UserProfileSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = CustomUser
 		fields = ['username', 'first_name', 'last_name', 'email', 'reviews', 'films_watched']
+
