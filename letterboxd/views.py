@@ -131,19 +131,19 @@ class FollowView(APIView):
 		Following.objects.create(follower=follower, the_followed=the_followed)
 		return Response( f"you are now following {followed_username}",HTTP_200_OK)
 
-		def delete(self, request):
+	def delete(self, request):
 			unfollower = request.user 
 			unfollowed = request.data.get('username')
 
-			if unfollower == unfollowed:
-				return Response("you can't unfollow yourself", HTTP_400_BAD_REQUEST)
+		if unfollower == unfollowed:
+			return Response("you can't unfollow yourself", HTTP_400_BAD_REQUEST)
 
-			try:
-				connection = Following.objects.get(follower=follower, following=following)
-				connection.delete()
-				return Response(HTTP_204_NO_CONTENT)
-			except:
-				return Response('Not Following User', HTTP_400_BAD_REQUEST)
+		try:
+			connection = Following.objects.get(follower=follower, following=following)
+			connection.delete()
+			return Response(HTTP_204_NO_CONTENT)
+		except:
+			return Response('Not Following User', HTTP_400_BAD_REQUEST)
 
 
 class LikeView(APIView):
