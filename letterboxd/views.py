@@ -119,11 +119,11 @@ class FollowView(APIView):
 		try:
 			the_followed = CustomUser.objects.get(username=followed_username)
 			if follower == the_followed:
-				return Response('you cannot follow yourself')
+				return Response('you cannot follow yourself', HTTP_400_BAD_REQUEST)
 			
 			for f in the_followed.followed.all():
 				if f.follower == follower:
-					return Response('already following user')
+					return Response('already following user', HTTP_400_BAD_REQUEST)
 
 		except CustomUser.DoesNotExist:
 			return Response('user does not exist')
