@@ -1,6 +1,6 @@
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
-from letterboxd.serializers import CustomUserSerializer, FilmSerializer, ReviewSerializer, UserListSerializer, UserProfileSerializer
+from letterboxd.serializers import CustomUserSerializer, FilmSerializer, ReviewSerializer, UserListSerializer, UserProfileSerializer, FollowingSerializer
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
@@ -130,23 +130,20 @@ class FollowView(APIView):
 		Following.objects.create(follower=follower, the_followed=the_followed)
 		return Response( f"you are now following {followed_username}",HTTP_200_OK)
 
+		def delete(self, request):
+			unfollower = request.user 
+			unfollowed = request.data.get('username')
 
-class UnFollowView(APIView):
-	permission_classes = [IsAuthenticated, ]
+			if unfollower == unfollowed:
+				return Response("you can't unfollow yourself", HTTP_400_BAD_REQUEST)
 
-	def delete(self, request):
-		unfollower = request.user 
-		unfollowed = request.data.get('username')
+			try:
+				connection = Following.objects.get(follower=follower, following=following)
+				connection.delete()
+				return Response(HTTP_204_NO_CONTENT)
+			except:
+				return Response('Not Following User', HTTP_400_BAD_REQUEST)
 
-		if unfollower == unfollowed:
-			return Response("you can't unfollow yourself")
-
-		try:
-			connection = Following.objects.get(follower=follower, following=following)
-			connection.delete()
-			return Response(HTTP_204_NO_CONTENT)
-		except:
-			return Response('Not Following User')
 
 class LikeView(APIView):
 	permission_classes = [IsAuthenticated, ]
@@ -155,6 +152,27 @@ class LikeView(APIView):
 		film = Film.objects.get(name=request.data["name"])
 		new_like, created = Like.objects.get_or_create(user=request.user, film=film)
 		if not created:
-			return Response("already liked")
+			return Response("already liked", HTTP_400_BAD_REQUEST)
 		else:
 			return Response("liked", HTTP_200_OK)
+
+class ListFollowingView(APIView):
+	permission_classes = [IsAuthenticated, ]
+
+	def get(self, request):
+		connections =  request.user.followers.all()
+		following = [connection.the_followed for connection in connections]
+
+		# print(following)
+
+		serializer =  UserProfileSerializer(following, many=True)
+		return Response(serializer.data, HTTP_200_OK)
+
+class ListFollowersView(APIView):
+	permission_classes = [IsAuthenticated, ]
+
+	def get(self, request):
+		connections = request.user.followed.all()
+		my_followers = [connection.follower for connection in connections]
+		serializer = UserProfileSerializer(my_followers, many=True)
+		return Response(serializer.data, HTTP_200_OK)

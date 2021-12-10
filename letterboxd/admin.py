@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, Film, Genre, Review
+from .models import CustomUser, Film, Genre, Review, Following
 
 
 class CustomeUserAdmin(admin.ModelAdmin):
@@ -14,7 +14,11 @@ class FilmAdmin(admin.ModelAdmin):
 	def get_genre(self, obj):
 		return '\n'.join([g.name for g in obj.genre.all()])
 
+class FollowingConnectionAdmin(admin.ModelAdmin):
+	list_display = ['follower', 'the_followed', 'date_followed']
+
 admin.site.register(CustomUser, CustomeUserAdmin)
 admin.site.register(Film, FilmAdmin)
 admin.site.register(Genre)
 admin.site.register(Review)
+admin.site.register(Following, FollowingConnectionAdmin)
