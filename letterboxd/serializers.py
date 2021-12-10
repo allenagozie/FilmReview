@@ -55,7 +55,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
 		model = CustomUser
 		fields = ['username', 'first_name', 'last_name', 'email', 'reviews', 'films_watched']
 
-class FollowingSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Following
-		fields = ['the_followed', ]

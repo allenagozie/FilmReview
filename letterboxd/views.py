@@ -60,6 +60,7 @@ class ListFilmView(APIView):
 		serializer = FilmSerializer(film_list, many=True)
 		return Response(serializer.data, HTTP_200_OK)
 
+
 class ReviewView(APIView):
 	queryset = Review.objects.all()
 	serializer_class = ReviewSerializer
@@ -162,9 +163,6 @@ class ListFollowingView(APIView):
 	def get(self, request):
 		connections =  request.user.followers.all()
 		following = [connection.the_followed for connection in connections]
-
-		# print(following)
-
 		serializer =  UserProfileSerializer(following, many=True)
 		return Response(serializer.data, HTTP_200_OK)
 
