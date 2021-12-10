@@ -59,6 +59,3 @@ class AddFilm(models.Model):
 class Like(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='likes', on_delete=models.CASCADE, null=True)
 	film = models.ForeignKey(Film, related_name='likes', on_delete=models.CASCADE, null=True)
-
-	def __str__(self):
-		return self.description 
