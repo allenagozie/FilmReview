@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Genre(models.Model):
 	name = models.CharField(max_length=30)
@@ -59,3 +59,8 @@ class AddFilm(models.Model):
 class Like(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='likes', on_delete=models.CASCADE, null=True)
 	film = models.ForeignKey(Film, related_name='likes', on_delete=models.CASCADE, null=True)
+
+class Rating(models.Model):
+	rate = models.ForeignKey(Film,validators=[MinValueValidator(0.0), MaxValueValidator(5.0)], on_delete=models.CASCADE)
+	film = models.ForeignKey(Film, on_delete=models.CASCADE, related_name='filmrating')
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='ratings', on_delete=models.CASCADE, null=True)

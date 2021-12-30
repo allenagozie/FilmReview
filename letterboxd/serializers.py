@@ -1,5 +1,5 @@
 from rest_framework import serializers 
-from .models import CustomUser, Film, Genre, Review, UserList, Following
+from .models import CustomUser, Film, Genre, Review, UserList, Following, Rating
 from rest_framework.validators import UniqueValidator
 
 
