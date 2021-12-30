@@ -1,14 +1,13 @@
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
-from letterboxd.serializers import CustomUserSerializer, FilmSerializer, ReviewSerializer, UserListSerializer, UserProfileSerializer, FollowingSerializer
-from rest_framework.response import Response
+from letterboxd.serializers import CustomUserSerializer, FilmSerializer, ReviewSerializer, UserListSerializer, UserProfileSerializer
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import permissions
-from .models import CustomUser, Film, Review, UserList, AddFilm, Following, Like
+from .models import CustomUser, Film, Review, UserList, AddFilm, Following, Like, Rating
 from .permissions import IsOwnerOrReadOnly
 from django.shortcuts import render
-
 from rest_framework.status import (
 	HTTP_400_BAD_REQUEST,
 	HTTP_204_NO_CONTENT,
@@ -101,15 +100,6 @@ class UserProfileView(APIView):
 		serializer = UserProfileSerializer(user)
 		return Response(serializer.data, HTTP_200_OK)
 
-class AddFilmView(APIView):
-	permission_classes= [IsAuthenticated, ]
-
-	def post(self, request):
-		film = Film.objects.get(name=request.data["name"])
-		request.user.films_watched.add(film)
-	
-		return Response(HTTP_200_OK)
-
 class FollowView(APIView):
 	permission_classes = [IsAuthenticated, ]
 
@@ -132,8 +122,8 @@ class FollowView(APIView):
 		return Response( f"you are now following {followed_username}",HTTP_200_OK)
 
 	def delete(self, request):
-			unfollower = request.user 
-			unfollowed = request.data.get('username')
+		unfollower = request.user 
+		unfollowed = request.data.get('username')
 
 		if unfollower == unfollowed:
 			return Response("you can't unfollow yourself", HTTP_400_BAD_REQUEST)
@@ -156,6 +146,16 @@ class LikeView(APIView):
 			return Response("already liked", HTTP_400_BAD_REQUEST)
 		else:
 			return Response("liked", HTTP_200_OK)
+
+class AddFilmView(APIView):
+	permission_classes= [IsAuthenticated, ]
+
+	def post(self, request):
+		film = Film.objects.get(name=request.data["name"])
+		rate = Rate.objects.get(name=request.data["rate"])
+		request.user.films_watched.add(film)
+		return Response("Film has been added", HTTP_200_OK)
+
 
 class ListFollowingView(APIView):
 	permission_classes = [IsAuthenticated, ]
